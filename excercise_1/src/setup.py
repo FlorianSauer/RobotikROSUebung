@@ -37,11 +37,17 @@ def makeExtension(extName):
     # include path to .h files (stdint.h)
     if platform.system() == 'Windows':
         fopenmp = '/openmp'
-        include_dirs = ['.'+extNameRoot+'/PlatformDependentCLibs/Windows', ]
+        clib_path = './' + extNameRoot + '/PlatformDependentCLibs/Windows'
     elif platform.system() == 'Linux':
-        include_dirs = ['.'+extNameRoot+'/PlatformDependentCLibs/Linux', ]
+        clib_path = './' + extNameRoot + '/PlatformDependentCLibs/Linux'
     else:
         print >> sys.stderr, "not fully supported platform, maybe rework the setup.py?"
+        clib_path = None
+    if clib_path:
+        if os.path.isdir(clib_path):
+            include_dirs = [clib_path, ]
+        else:
+            print "Path to CLibs "+repr(clib_path)+" does not exist. Check this if a C-Library/Header file is missing."
 
     extPath = extName.replace(".", os.path.sep) + ".pyx"
     dirname = os.path.dirname(extName.replace(".", os.path.sep) + ".pyx")
@@ -52,8 +58,8 @@ def makeExtension(extName):
     return Extension(
         extName,
         sourcefiles,
-        extra_compile_args=[fopenmp],
-        extra_link_args=[fopenmp],
+        extra_compile_args=[fopenmp, ],
+        extra_link_args=[fopenmp, ],
         include_dirs=include_dirs
     )
 
