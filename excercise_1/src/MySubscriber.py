@@ -2,10 +2,14 @@
 
 import traceback
 
+import numpy
 import rospy
 from genpy import Message
+from keras import Model
 from sensor_msgs.msg import CompressedImage
-from typing import TypeVar, Type, Generic
+from typing import TypeVar, Type, Generic, Any
+
+from Libs.PythonLibs.Callback import Callback
 
 T = TypeVar('T', Message, Message)
 PUBLISH_RATE = 3  # hz
@@ -36,6 +40,34 @@ class CompressedImageSubscriber(RosSubscriber):
         print "header", message.header
         print "format", message.format
         print "data", len(message.data), "bytes"
+
+
+class PredictionCISubscriber(CompressedImageSubscriber):
+
+    def __init__(self, topic, model, prediction_callback):
+        # type: (str, Model, Callback[int, Any]) -> None
+        """
+
+        :param topic:
+        :param model: should be already trained model
+        :param prediction_callback:
+        """
+        super(PredictionCISubscriber, self).__init__(topic)
+
+        self.model = model
+        self.prediction_callback = prediction_callback
+
+    def handle(self, message):
+        # type: (CompressedImage) -> None
+        super(PredictionCISubscriber, self).handle(message)
+        prediction = self.model.predict(self.unpackMessage(message))
+
+        if self.prediction_callback.callable(prediction):
+            self.prediction_callback.call(prediction)
+
+    def unpackMessage(self, message):
+        # type: (CompressedImage) -> numpy.array
+        raise NotImplementedError
 
 
 class RosSubscriberApp(object):
