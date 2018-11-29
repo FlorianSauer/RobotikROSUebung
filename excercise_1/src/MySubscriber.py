@@ -75,7 +75,13 @@ class PredictionCISubscriber(CompressedImageSubscriber):
     # noinspection PyUnresolvedReferences
     def unpackMessage(self, message):
         # type: (CompressedImage) -> numpy.array
-        return self.cv_bridge.compressed_imgmsg_to_cv2(message)
+        self.unpackMessageStatic(self.cv_bridge, message)
+
+    # noinspection PyUnresolvedReferences
+    @staticmethod
+    def unpackMessageStatic(bridge, message):
+        # type: (CvBridge, CompressedImage) -> numpy.array
+        return bridge.compressed_imgmsg_to_cv2(message)
 
 
 class RosSubscriberApp(object):
