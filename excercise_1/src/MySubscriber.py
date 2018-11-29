@@ -12,6 +12,7 @@ from keras.layers import Conv2D, MaxPooling2D, Dropout, Flatten, Dense
 from sensor_msgs.msg import CompressedImage
 from std_msgs.msg import Int32
 from typing import TypeVar, Type, Generic, Any
+from wrapt import synchronized
 
 from Libs.PythonLibs.Callback import Callback
 
@@ -62,12 +63,13 @@ class PredictionCISubscriber(CompressedImageSubscriber):
         self.prediction_callback = prediction_callback
         self.cv_bridge = CvBridge()
 
+    @synchronized
     def handle(self, message):
         # type: (CompressedImage) -> None
         super(PredictionCISubscriber, self).handle(message)
         prediction = self.model.predict(self.unpackMessage(message))
 
-        # Todo: hotencoded -> real class number 
+        # Todo: hotencoded -> real class number
 
         if self.prediction_callback.callable(prediction):
             self.prediction_callback.call(prediction)
