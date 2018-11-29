@@ -5,13 +5,14 @@ import traceback
 import keras
 import numpy
 import rospy
+from cv_bridge import CvBridge
 from genpy import Message
 from keras import Model, Sequential
 from keras.layers import Conv2D, MaxPooling2D, Dropout, Flatten, Dense
 from sensor_msgs.msg import CompressedImage
+from std_msgs.msg import Int32
 from typing import TypeVar, Type, Generic, Any
-from cv_bridge import CvBridge
-
+from wrapt import synchronized
 
 from Libs.PythonLibs.Callback import Callback
 
@@ -23,7 +24,7 @@ class RosSubscriber(Generic[T]):
     def __init__(self, topic, datatype):
         # type: (str, Type[T]) -> None
         super(RosSubscriber, self).__init__()
-        self.topic = topic
+        self.topic = topic  # type: str
         self.datatype = datatype  # type: Type[T]
         self._subscriber = rospy.Subscriber(self.topic, self.datatype, self.handle)
 
@@ -62,25 +63,48 @@ class PredictionCISubscriber(CompressedImageSubscriber):
         self.prediction_callback = prediction_callback
         self.cv_bridge = CvBridge()
 
+    @synchronized
     def handle(self, message):
         # type: (CompressedImage) -> None
         super(PredictionCISubscriber, self).handle(message)
         prediction = self.model.predict(self.unpackMessage(message))
 
+        # Todo: hotencoded -> real class number
+
         if self.prediction_callback.callable(prediction):
             self.prediction_callback.call(prediction)
+        else:
+            print "YOUR CALLBACK FAILED, maybe you should rework this ;)"
 
     # noinspection PyUnresolvedReferences
     def unpackMessage(self, message):
         # type: (CompressedImage) -> numpy.array
-        return self.cv_bridge.compressed_imgmsg_to_cv2(message)
+        self.unpackMessageStatic(self.cv_bridge, message)
+
+    # noinspection PyUnresolvedReferences
+    @staticmethod
+    def unpackMessageStatic(bridge, message):
+        # type: (CvBridge, CompressedImage) -> numpy.array
+        return bridge.compressed_imgmsg_to_cv2(message)
+
 
 #wrapper fuer rospy subscriber
 class RosSubscriberApp(object):
+    modelpath = 'todo'
+
     def __init__(self):
         print "__init__", self.__class__.__name__
+        self.prediction_publisher = rospy.Publisher('/camera/input/specific/number',
+                                                    Int32,
+                                                    queue_size=1)  # publish given data to topic
+        # -> wrap .publish() in Callback
+        self.prediction_publish_callback = Callback(lambda i: self.prediction_publisher.publish(i), single=True)
         #wir melden den Subscriber am Rosnode an bzw. an der compressed image Topic
-        self.subscriber = PredictionCISubscriber('/camera/output/specific/compressed_img_msgs', )
+
+        # -> pass Callback to self.subscriber
+        self.subscriber = PredictionCISubscriber('/camera/output/specific/compressed_img_msgs',
+                                                 self.loadMakeModel(self.modelpath),
+                                                 self.prediction_publish_callback)
 
         pass
 
