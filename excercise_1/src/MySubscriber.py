@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-
+import os
 import traceback
 
 import keras
@@ -68,6 +68,8 @@ class PredictionCISubscriber(CompressedImageSubscriber):
         # type: (CompressedImage) -> None
         super(PredictionCISubscriber, self).handle(message)
         prediction = self.model.predict(self.unpackMessage(message))
+        # noinspection PyUnresolvedReferences
+        prediction = numpy.argmax(prediction, axis=None, out=None)
 
         # Todo: hotencoded -> real class number
 
@@ -75,6 +77,7 @@ class PredictionCISubscriber(CompressedImageSubscriber):
             self.prediction_callback.call(prediction)
         else:
             print "YOUR CALLBACK FAILED, maybe you should rework this ;)"
+
 
     # noinspection PyUnresolvedReferences
     def unpackMessage(self, message):
@@ -88,9 +91,9 @@ class PredictionCISubscriber(CompressedImageSubscriber):
         return bridge.compressed_imgmsg_to_cv2(message)
 
 
-#wrapper fuer rospy subscriber
+# wrapper fuer rospy subscriber
 class RosSubscriberApp(object):
-    modelpath = 'todo'
+    modelpath = os.path.abspath(os.path.join(os.path.dirname(__file__), 'testResources/weights-best.hdf5'))
 
     def __init__(self):
         print "__init__", self.__class__.__name__
@@ -98,8 +101,8 @@ class RosSubscriberApp(object):
                                                     Int32,
                                                     queue_size=1)  # publish given data to topic
         # -> wrap .publish() in Callback
+        # wir melden den Subscriber am Rosnode an bzw. an der compressed image Topic
         self.prediction_publish_callback = Callback(lambda i: self.prediction_publisher.publish(i), single=True)
-        #wir melden den Subscriber am Rosnode an bzw. an der compressed image Topic
 
         # -> pass Callback to self.subscriber
         self.subscriber = PredictionCISubscriber('/camera/output/specific/compressed_img_msgs',
