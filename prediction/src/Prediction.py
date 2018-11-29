@@ -10,6 +10,10 @@ from sensor_msgs.msg import CompressedImage
 from std_msgs.msg import Bool, Int32
 
 
+
+
+
+
 class Prediction:
     def __init__(self):
         self.cv_bridge = CvBridge()

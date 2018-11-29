@@ -75,11 +75,12 @@ class PredictionCISubscriber(CompressedImageSubscriber):
         # type: (CompressedImage) -> numpy.array
         return self.cv_bridge.compressed_imgmsg_to_cv2(message)
 
-
+#wrapper fuer rospy subscriber
 class RosSubscriberApp(object):
     def __init__(self):
         print "__init__", self.__class__.__name__
-        self.subscriber = CompressedImageSubscriber('/camera/output/specific/compressed_img_msgs')
+        #wir melden den Subscriber am Rosnode an bzw. an der compressed image Topic
+        self.subscriber = PredictionCISubscriber('/camera/output/specific/compressed_img_msgs', )
 
         pass
 
@@ -91,7 +92,8 @@ class RosSubscriberApp(object):
             rate.sleep()
         pass
 
-    def loadMakeModel(self, path):
+    @staticmethod
+    def loadMakeModel(path):
         num_classes = 10
         # input image dimensions
         img_rows, img_cols = 28, 28
