@@ -67,6 +67,8 @@ class PredictionCISubscriber(CompressedImageSubscriber):
         super(PredictionCISubscriber, self).handle(message)
         prediction = self.model.predict(self.unpackMessage(message))
 
+        # Todo: hotencoded -> real class number 
+
         if self.prediction_callback.callable(prediction):
             self.prediction_callback.call(prediction)
         else:
