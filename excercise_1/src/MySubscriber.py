@@ -5,13 +5,13 @@ import traceback
 import keras
 import numpy
 import rospy
+from cv_bridge import CvBridge
 from genpy import Message
 from keras import Model, Sequential
 from keras.layers import Conv2D, MaxPooling2D, Dropout, Flatten, Dense
 from sensor_msgs.msg import CompressedImage
+from std_msgs.msg import Int32
 from typing import TypeVar, Type, Generic, Any
-from cv_bridge import CvBridge
-
 
 from Libs.PythonLibs.Callback import Callback
 
@@ -23,7 +23,7 @@ class RosSubscriber(Generic[T]):
     def __init__(self, topic, datatype):
         # type: (str, Type[T]) -> None
         super(RosSubscriber, self).__init__()
-        self.topic = topic
+        self.topic = topic  # type: str
         self.datatype = datatype  # type: Type[T]
         self._subscriber = rospy.Subscriber(self.topic, self.datatype, self.handle)
 
@@ -69,6 +69,8 @@ class PredictionCISubscriber(CompressedImageSubscriber):
 
         if self.prediction_callback.callable(prediction):
             self.prediction_callback.call(prediction)
+        else:
+            print "YOUR CALLBACK FAILED, maybe you should rework this ;)"
 
     # noinspection PyUnresolvedReferences
     def unpackMessage(self, message):
@@ -77,9 +79,20 @@ class PredictionCISubscriber(CompressedImageSubscriber):
 
 
 class RosSubscriberApp(object):
+    modelpath = 'todo'
+
     def __init__(self):
         print "__init__", self.__class__.__name__
-        self.subscriber = CompressedImageSubscriber('/camera/output/specific/compressed_img_msgs')
+        self.prediction_publisher = rospy.Publisher('/camera/input/specific/number',
+                                                    Int32,
+                                                    queue_size=1)  # publish given data to topic
+        # -> wrap .publish() in Callback
+        self.prediction_publish_callback = Callback(lambda i: self.prediction_publisher.publish(i), single=True)
+
+        # -> pass Callback to self.subscriber
+        self.subscriber = PredictionCISubscriber('/camera/output/specific/compressed_img_msgs',
+                                                 self.loadMakeModel(self.modelpath),
+                                                 self.prediction_publish_callback)
 
         pass
 
@@ -91,7 +104,8 @@ class RosSubscriberApp(object):
             rate.sleep()
         pass
 
-    def loadMakeModel(self, path):
+    @staticmethod
+    def loadMakeModel(path):
         num_classes = 10
         # input image dimensions
         img_rows, img_cols = 28, 28
