@@ -8,7 +8,7 @@ import numpy as np
 from keras import backend as k
 from keras.datasets import mnist
 
-from MySubscriber import RosSubscriberApp
+from excercise_1.src.MySubscriber import RosPredictionApp
 
 
 # teste die loadMakeModel darauf, ob sie aus eine Stringeingabe für einen Pfad eine Prediction abliefern kann
@@ -99,7 +99,7 @@ class TestRosSubscriberApp(TestCase):
 
         # data to choose
 
-        model = RosSubscriberApp.loadMakeModel(self.getPath())
+        model = RosPredictionApp.loadMakeModel(self.getPath())
         for index in xrange(100):
             # expand dimension for batch
             input_data = np.expand_dims(x_test[index], axis=0)  # tensorflow
