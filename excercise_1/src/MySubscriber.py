@@ -10,7 +10,7 @@ from genpy import Message
 from keras import Model, Sequential
 from keras.layers import Conv2D, MaxPooling2D, Dropout, Flatten, Dense
 from sensor_msgs.msg import CompressedImage
-from std_msgs.msg import Int32
+from std_msgs.msg import Int32, Bool
 from typing import TypeVar, Type, Generic, Any
 from wrapt import synchronized
 
@@ -20,7 +20,12 @@ T = TypeVar('T', Message, Message)
 PUBLISH_RATE = 3  # hz
 
 
+# wrapper fuer rospy subscriber
 class RosSubscriber(Generic[T]):
+    """
+    Wrapper for rospy.Subscriber
+    """
+
     def __init__(self, topic, datatype):
         # type: (str, Type[T]) -> None
         super(RosSubscriber, self).__init__()
@@ -33,8 +38,17 @@ class RosSubscriber(Generic[T]):
         raise NotImplementedError
 
 
-class CompressedImageSubscriber(RosSubscriber):
+class MessagePrinterSubscriber(RosSubscriber):
+    def handle(self, message):
+        # type: (Bool) -> None
+        print "received Bool"
+        print "data", message.data
+        # print "header", message.header
+        # print "format", message.format
+        # print "data", len(message.data), "bytes"
 
+
+class CompressedImageSubscriber(RosSubscriber):
     def __init__(self, topic):
         # type: (str) -> None
         super(CompressedImageSubscriber, self).__init__(topic, CompressedImage)
@@ -66,8 +80,10 @@ class PredictionCISubscriber(CompressedImageSubscriber):
     @synchronized
     def handle(self, message):
         # type: (CompressedImage) -> None
-        super(PredictionCISubscriber, self).handle(message)
-        prediction = self.model.predict(self.unpackMessage(message))
+        # super(PredictionCISubscriber, self).handle(message)
+        input_data = numpy.expand_dims(self.unpackMessage(message), axis=0)  # tensorflow
+
+        prediction = self.model.predict(input_data)
         # noinspection PyUnresolvedReferences
         prediction = numpy.argmax(prediction, axis=None, out=None)
 
@@ -78,11 +94,14 @@ class PredictionCISubscriber(CompressedImageSubscriber):
         else:
             print "YOUR CALLBACK FAILED, maybe you should rework this ;)"
 
-
     # noinspection PyUnresolvedReferences
     def unpackMessage(self, message):
         # type: (CompressedImage) -> numpy.array
-        self.unpackMessageStatic(self.cv_bridge, message)
+        a = self.unpackMessageStatic(self.cv_bridge, message)
+        a = a.astype('float32')
+        a /= 255.
+        a = a.reshape(28, 28, 1)
+        return a
 
     # noinspection PyUnresolvedReferences
     @staticmethod
@@ -91,7 +110,6 @@ class PredictionCISubscriber(CompressedImageSubscriber):
         return bridge.compressed_imgmsg_to_cv2(message)
 
 
-# wrapper fuer rospy subscriber
 class RosSubscriberApp(object):
     modelpath = os.path.abspath(os.path.join(os.path.dirname(__file__), 'testResources/weights-best.hdf5'))
 
@@ -108,6 +126,8 @@ class RosSubscriberApp(object):
         self.subscriber = PredictionCISubscriber('/camera/output/specific/compressed_img_msgs',
                                                  self.loadMakeModel(self.modelpath),
                                                  self.prediction_publish_callback)
+
+        self.checkSubscriber = MessagePrinterSubscriber('/camera/output/specific/check', Bool)
 
         pass
 
@@ -152,6 +172,8 @@ class RosSubscriberApp(object):
                       metrics=['accuracy'])
 
         model.load_weights(filepath=path)
+        model._make_predict_function()
+        # keras.backend.clear_session()
         return model
 
 
