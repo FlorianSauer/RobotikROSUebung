@@ -5,10 +5,11 @@ from unittest import TestCase
 import keras
 import numpy
 import numpy as np
+from cv_bridge import CvBridge
 from keras import backend as k
 from keras.datasets import mnist
 
-from excercise_1.src.MySubscriber import RosPredictionApp
+from Prediction import RosPredictionApp, PredictionCISubscriber
 
 
 # teste die loadMakeModel darauf, ob sie aus eine Stringeingabe für einen Pfad eine Prediction abliefern kann
@@ -23,6 +24,15 @@ class TestRosSubscriberApp(TestCase):
         else:
             rand_int = numpy.random.randint(0, len(y_test), dtype='int')
         return x_test[rand_int]
+
+    def getRandomOrigMnistImageMessage(self, seed=None):
+        cv_bridge = CvBridge()
+        (_, _), (x_test, y_test) = mnist.load_data()
+        if seed:
+            rand_int = seed
+        else:
+            rand_int = numpy.random.randint(0, len(y_test), dtype='int')
+        return cv_bridge.cv2_to_compressed_imgmsg(x_test[rand_int])
 
     def getRandomReformedMnistImage(self, seed=None):
         # the data, split between train and test sets
@@ -48,16 +58,19 @@ class TestRosSubscriberApp(TestCase):
     def test_reshapeImage(self):
         seed = 6
         orig_mnist = self.getRandomOrigMnistImage(seed)
+        orig_mnist_message = self.getRandomOrigMnistImageMessage(seed)
         reshaped_mnist = self.getRandomReformedMnistImage(seed)
         orig_mnist = orig_mnist.astype('float32')
         orig_mnist /= 255.
         orig_mnist = orig_mnist.reshape(28, 28, 1)
-        print repr(orig_mnist)
-        print '#'*25
-        print repr(reshaped_mnist)
-        print reshaped_mnist == orig_mnist
-        print reshaped_mnist.shape
-        print orig_mnist.shape
+        cv_bridge = CvBridge()
+        numpy.testing.assert_array_equal(reshaped_mnist, PredictionCISubscriber.unpackMessageStatic(cv_bridge, orig_mnist_message))
+        # print repr(orig_mnist)
+        # print '#'*25
+        # print repr(reshaped_mnist)
+        # print reshaped_mnist == orig_mnist
+        # print reshaped_mnist.shape
+        # print orig_mnist.shape
         # self.assertEquals(orig_mnist, reshaped_mnist)
 
     # teste ob das Model erfolgereiche Vorhersagen trifft
