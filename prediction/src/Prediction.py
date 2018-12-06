@@ -92,17 +92,17 @@ class PredictionCISubscriber(CompressedImageSubscriber):
     # noinspection PyUnresolvedReferences
     def unpackMessage(self, message):
         # type: (CompressedImage) -> numpy.array
-        a = self.unpackMessageStatic(self.cv_bridge, message)
-        a = a.astype('float32')
-        a /= 255.
-        a = a.reshape(28, 28, 1)
-        return a
+        return self.unpackMessageStatic(self.cv_bridge, message)
 
     # noinspection PyUnresolvedReferences
     @staticmethod
     def unpackMessageStatic(bridge, message):
         # type: (CvBridge, CompressedImage) -> numpy.array
-        return bridge.compressed_imgmsg_to_cv2(message)
+        a = bridge.compressed_imgmsg_to_cv2(message)
+        a = a.reshape(28, 28, 1)
+        a = a.astype('float32')
+        a /= 255.
+        return a
 
 
 class RosPredictionApp(object):
