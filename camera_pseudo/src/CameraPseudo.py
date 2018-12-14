@@ -1,10 +1,9 @@
 #!/usr/bin/env python
 
-from cv_bridge import CvBridge
-
 import cv2
 import numpy
 import rospy
+from cv_bridge import CvBridge
 from keras.datasets import mnist
 from sensor_msgs.msg import CompressedImage
 from std_msgs.msg import Bool, Int32
@@ -59,6 +58,8 @@ class CameraPseudo:
     def camera_specific_callback(self, msg):
         # check if input is same as defined value
         result = True if msg.data == self.labels[SPECIFIC_VALUE] else False
+        print "msg.data", msg.data
+        print "self.labels[SPECIFIC_VALUE="+str(SPECIFIC_VALUE)+"]", self.labels[SPECIFIC_VALUE]
 
         # publish result
         self.publisher_specific_check.publish(result)
