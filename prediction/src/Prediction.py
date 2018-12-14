@@ -38,6 +38,8 @@ class RosSubscriber(Generic[T]):
 
 
 class MessagePrinterSubscriber(RosSubscriber):
+    """print whether or not the prediction we made was correct"""
+
     def handle(self, message):
         # type: (Bool) -> None
         print "received Bool"
@@ -45,6 +47,8 @@ class MessagePrinterSubscriber(RosSubscriber):
 
 
 class CompressedImageSubscriber(RosSubscriber):
+    """receive compressed image and print image information"""
+
     def __init__(self, topic):
         # type: (str) -> None
         super(CompressedImageSubscriber, self).__init__(topic, CompressedImage)
@@ -58,11 +62,11 @@ class CompressedImageSubscriber(RosSubscriber):
 
 
 class PredictionCISubscriber(CompressedImageSubscriber):
+    """class to predict what number was sent based on trained model"""
 
     def __init__(self, topic, model, prediction_callback):
         # type: (str, Model, Callback[int, Any]) -> None
         """
-
         :param topic:
         :param model: should be already trained model
         :param prediction_callback:
@@ -76,8 +80,9 @@ class PredictionCISubscriber(CompressedImageSubscriber):
     @synchronized
     def handle(self, message):
         # type: (CompressedImage) -> None
-        input_data = numpy.expand_dims(self.unpackMessage(message), axis=0)  # tensorflow
+        """make prediction based on received image message"""
 
+        input_data = numpy.expand_dims(self.unpackMessage(message), axis=0)  # tensorflow
         prediction = self.model.predict(input_data)
         # noinspection PyUnresolvedReferences
         prediction = numpy.argmax(prediction, axis=None, out=None)
@@ -92,12 +97,14 @@ class PredictionCISubscriber(CompressedImageSubscriber):
     # noinspection PyUnresolvedReferences
     def unpackMessage(self, message):
         # type: (CompressedImage) -> numpy.array
+        """adjust the image message to necessary format for prediction"""
         return self.unpackMessageStatic(self.cv_bridge, message)
 
     # noinspection PyUnresolvedReferences
     @staticmethod
     def unpackMessageStatic(bridge, message):
         # type: (CvBridge, CompressedImage) -> numpy.array
+        """adjust the image message to necessary format for prediction"""
         a = bridge.compressed_imgmsg_to_cv2(message)
         a = a.reshape(28, 28, 1)
         a = a.astype('float32')
@@ -110,6 +117,7 @@ class RosPredictionApp(object):
 
     def __init__(self):
         print "__init__", self.__class__.__name__
+        # declare prediction node
         self.prediction_publisher = rospy.Publisher('/camera/input/specific/number',
                                                     Int32,
                                                     queue_size=1)  # publish given data to topic
@@ -136,6 +144,7 @@ class RosPredictionApp(object):
 
     @staticmethod
     def loadMakeModel(path):
+        """" loads and initializes model according to mnist example"""
         num_classes = 10
         # input image dimensions
         img_rows, img_cols = 28, 28
