@@ -38,5 +38,5 @@ Because the image message received by the 'camera-pseudo' node was not correctly
 Model, a unpackMessageStatic method had to be implemented in the class PredictionCISubscriber (superclass is the 
 RosSubscriber class).
 
-Also the checking of a correct prediction for random images was skipped, because given current state it is impossible 
-to link an image-prediction with the test of its correctness.
+Also the checking of a correct prediction for random images was skipped, because given the current state of the project it is impossible 
+to link an image-prediction with the test of its correctness.This is also due to the asynchronious communication between nodes, and can be surmounted by providing an identifier to the images sent and the corresponding tests.
