@@ -27,17 +27,19 @@ this topic. If a new subscriber subscribes to the topic, he will receive the las
 ### Subscriber and Callbacks
 
 The publish-subscriber pattern works asynchronous. Subscribers therefor require callbacks to handle the received 
-messages. Callbacks are functions passed to a subscriber via reference, which get called, when a new message was sent 
-from the broker and received by the subscriber. For this exercise, the passing of a callback to a subscriber was 
-wrapped by the RosSubscriber class, where only the handle method has to be implemented.
+messages. Callbacks are functions passed to a subscriber via reference. This callback gets called, when a new message 
+was received from the broker. For this exercise, the passing of a callback to a subscriber was wrapped by the 
+RosSubscriber class, where only the handle method has to be implemented.
 
 # Development 
 
-The project was developed using the given excercise template and the mnist example.
+The project was developed using the given exercise template and the 'mnist' dataset example.
 The counterparts for the image-publishing-topics in 'camera-pseudo' node were added and implemented inside the 
-'prediction' node. The already pre-learned prediction model was taken from the mnist example. to load a prelearned 
+'prediction' node. The already pre-learned prediction model was taken from the 'mnist' example. To load a pre-learned 
 model, a loadMakeModel() method was implemented.
 Because the image message received by the 'camera-pseudo' node was not correctly shaped to be processed by the Keras 
 Model, a unpackMessageStatic method had to be implemented in the class PredictionCISubscriber (superclass is the 
 RosSubscriber class).
 
+Also the checking of a correct prediction for random images was skipped, because at the current state it is impossible 
+to link a image-prediction with a correctness info.
