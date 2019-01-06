@@ -1,4 +1,10 @@
-# Repo
+# Exercise-1
+Florian Sauer s0552569 </br>
+Camilo Ocampo s0546867 </br>
+Alain Ngoufack Nguefack S0557214
+
+
+
 <https://github.com/FlorianSauer/RobotikROSUebung>
 
 # Ros Basics 
