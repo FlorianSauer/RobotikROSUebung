@@ -1,7 +1,7 @@
 # Ros Basics 
 
 
-Ros is an operating system used for robotic research and development. In the context of our project this semester, we used ROS to predict numbers as displayed in pictures. In doing this we learned about some the ROS basics. The first of these basics is the ROS workspace. ROS uses the workspace to combine different spaces, which allows us to work with different packages and versions of ROS. In our case the main advantage was package management, particularly as it pertains to building our application. A further advantage was shell support in the sense that running 
+Ros is an operating system used for robotic research and development. In the context of our project this semester, we used ROS to predict numbers as displayed in pictures. In doing this we learned about some of the ROS basics. The first of these basics is the ROS workspace. ROS uses the workspace to combine different spaces, which allows us to work with different packages and versions of ROS. In our case the main advantage was package management, particularly as it pertains to building our application. A further advantage was shell support in the sense that running 
 ```
 rosrun [package_name] [node_name] 
 ```
@@ -13,10 +13,7 @@ roscore [package_name] [node_name]
     Roscore takes care of starting a ROS Master, a ROS Parameter Server and a rosout logging node. After calling roscore we called 
    ```rosrun [package_name] [node_name]``` 
    Rosrun takes care of starting a rosnode from a given package. A ROS node is at the core of the ROS functionality. It is an executable that uses ROS to communicate with other nodes. A node can be a publisher, subscriber, or a service and uses the client library to communicate with other nodes.  
-
-This is required because ROS relies on the notion of combining spaces using the shell environment. This makes developing against different versions of ROS or against different sets of packages easier. 
-
-
+ 
 # Publisher and Subscriber
 ### Publish-Subscriber Principle
 The Publisher connects via TCP to a central Broker, which in the case of ROS is built into ROSCORE. The publisher 
@@ -26,8 +23,8 @@ this topic. If a new subscriber subscribes to the topic, he will receive the las
 
 ### Subscriber and Callbacks
 
-The publish-subscriber pattern works asynchronous. Subscribers therefor require callbacks to handle the received 
-messages. Callbacks are functions passed to a subscriber via reference. This callback gets called, when a new message 
+The publish-subscriber pattern works asynchronously. Subscribers therefore require callbacks to handle the received 
+messages. Callbacks are functions passed to a subscriber via a reference. This callback gets called, when a new message 
 was received from the broker. For this exercise, the passing of a callback to a subscriber was wrapped by the 
 RosSubscriber class, where only the handle method has to be implemented.
 
@@ -41,5 +38,5 @@ Because the image message received by the 'camera-pseudo' node was not correctly
 Model, a unpackMessageStatic method had to be implemented in the class PredictionCISubscriber (superclass is the 
 RosSubscriber class).
 
-Also the checking of a correct prediction for random images was skipped, because at the current state it is impossible 
-to link a image-prediction with a correctness info.
+Also the checking of a correct prediction for random images was skipped, because given current state it is impossible 
+to link an image-prediction with the test of its correctness.
