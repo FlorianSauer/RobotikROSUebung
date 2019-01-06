@@ -117,10 +117,10 @@ class RosPredictionApp(object):
 
     def __init__(self):
         print "__init__", self.__class__.__name__
-        # declare prediction node
+        # declare+register prediction result topic
         self.prediction_publisher = rospy.Publisher('/camera/input/specific/number',
                                                     Int32,
-                                                    queue_size=1)  # publish given data to topic
+                                                    queue_size=1)  # publish given data as 32bit integer to topic
         # -> wrap .publish() in Callback
         self.prediction_publish_callback = Callback(lambda i: self.prediction_publisher.publish(i), single=True)
 
