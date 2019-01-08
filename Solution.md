@@ -1,8 +1,8 @@
 # Exercise-1
-Florian Sauer s0552569 </br>
-Camilo Ocampo s0546867 </br>
-Alain Ngoufack Nguefack S0557214
-
+Florian Sauer s0552569   
+Camilo Ocampo s0546867   
+Alain Ngoufack Nguefack S0557214  
+Jean Franklin Kamani s0555096  
 
 
 <https://github.com/FlorianSauer/RobotikROSUebung>
