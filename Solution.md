@@ -1,7 +1,7 @@
 # Exercise-1
 Florian Sauer s0552569   
 Camilo Ocampo s0546867   
-Alain Ngoufack Nguefack S0557214  
+Alain Ngoufack Nguefack s0557214  
 Jean Franklin Kamani s0555096  
 
 
