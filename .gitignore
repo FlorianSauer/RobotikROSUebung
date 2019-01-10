@@ -163,3 +163,4 @@ build/
 *.old
 *.prof
 *.swp
+.DS_Store
