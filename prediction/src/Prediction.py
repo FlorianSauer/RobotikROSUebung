@@ -15,6 +15,7 @@ from typing import TypeVar, Type, Generic, Any
 from wrapt import synchronized
 
 from Libs.PythonLibs.Callback import Callback
+from SoundPlayer import SoundPlayer
 
 T = TypeVar('T', Message, Message)
 PUBLISH_RATE = 3  # hz
@@ -113,16 +114,18 @@ class PredictionCISubscriber(CompressedImageSubscriber):
 
 
 class RosPredictionApp(object):
-    modelpath = os.path.abspath(os.path.join(os.path.dirname(__file__), 'testResources/weights-best.hdf5'))
+    resource_path = os.path.abspath(os.path.join(os.path.dirname(__file__), 'Resources'))
+    modelpath = os.path.join(resource_path, 'weights-best.hdf5')
 
     def __init__(self):
         print "__init__", self.__class__.__name__
+        self.sound_player = SoundPlayer(self.resource_path)
         # declare+register prediction result topic
         self.prediction_publisher = rospy.Publisher('/camera/input/specific/number',
                                                     Int32,
                                                     queue_size=1)  # publish given data as 32bit integer to topic
         # -> wrap .publish() in Callback
-        self.prediction_publish_callback = Callback(lambda i: self.prediction_publisher.publish(i), single=True)
+        self.prediction_publish_callback = Callback(lambda i: self.sound_player.playSound(i), single=True)
 
         # -> pass Callback to self.subscriber
         # register subscriber @roscore node with given topic

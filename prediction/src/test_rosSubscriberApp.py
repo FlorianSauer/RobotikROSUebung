@@ -15,7 +15,7 @@ from Prediction import RosPredictionApp, PredictionCISubscriber
 # teste die loadMakeModel darauf, ob sie aus eine Stringeingabe für einen Pfad eine Prediction abliefern kann
 class TestRosSubscriberApp(TestCase):
     def getPath(self):
-        return os.path.abspath(os.path.join(os.path.dirname(__file__), 'testResources/weights-best.hdf5'))
+        return os.path.abspath(os.path.join(os.path.dirname(__file__), 'Resources/weights-best.hdf5'))
 
     def getRandomOrigMnistImage(self, seed=None):
         (_, _), (x_test, y_test) = mnist.load_data()
