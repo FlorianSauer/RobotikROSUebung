@@ -1,16 +1,88 @@
 #!/usr/bin/env python
+import cPickle
+import socket
+import struct
+from Queue import Queue
+from threading import Thread
 
-import cv2
 import numpy
 import rospy
 from cv_bridge import CvBridge
 from keras.datasets import mnist
 from sensor_msgs.msg import CompressedImage
 from std_msgs.msg import Bool, Int32
+from typing import Tuple
 
 SPECIFIC_VALUE = 6  # value can be changed for different test-cases. This is not the labeled value but an index
 PUBLISH_RATE = 3  # hz
-USE_WEBCAM = False
+USE_WEBCAM = True
+
+
+class RemoteWebcamReader(object):
+    def __init__(self):
+        self.server_sock = socket.socket()
+        self.server_sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+        self.server_sock.bind(('', 42069))
+        self.server_sock.listen(5)
+
+        self._isopened = False
+        self.image_queue = Queue(1000)
+        self.int_struct = struct.Struct('!Q')
+
+    def start(self):
+        server_thread = Thread(target=self.server_listener)
+        server_thread.daemon = True
+        server_thread.start()
+        self._isopened = True
+
+    def server_listener(self):
+        while True:
+            client_sock, client_addr = self.server_sock.accept()
+            client_thread = Thread(target=self.client_handler, args=(client_sock, client_addr))
+            client_thread.daemon = True
+            client_thread.start()
+
+    def client_handler(self, client_sock, addr):
+        # type: (socket.socket, Tuple[str, int]) -> None
+        while True:
+            try:
+                pickle_len = self.int_struct.unpack(self._sock_recv_helper(client_sock, 8))[0]
+                pickle_data = self._sock_recv_helper(client_sock, pickle_len)
+            except socket.error as e:
+                print "connection from", addr, "broke", repr(e)
+                break
+            frame = cPickle.loads(pickle_data)
+            self.image_queue.put(frame, block=False)
+
+    def isOpened(self):
+        return self._isopened
+
+    def read(self):
+        return self.image_queue.get()
+
+    @classmethod
+    def _sock_recv_helper(cls, sock, buffersize):
+        # type: (socket.socket, int) -> str
+        # Helper function to recv 'size' bytes or return None if EOF is hit
+        # bypasses the problem, where a .sendall() -> read() would not transmit / receive all bytes.
+        # ensures, that the given buffersize is received
+        if buffersize == 0:
+            return ''
+        data = ''
+        datalength = 0
+        while datalength < buffersize:
+            try:
+                packet = sock.recv(buffersize - datalength)
+                # print "received packet", len(packet) if packet else 0
+            except (MemoryError, OverflowError):
+                print 'buffersize', buffersize
+                raise
+            if not packet:
+                raise socket.error("peer closed Connection without sending all expected data (expected: " + str(
+                    buffersize) + ", received: " + str(len(data)) + ")")
+            data += packet
+            datalength = len(data)
+        return data
 
 
 class CameraPseudo:
@@ -26,7 +98,7 @@ class CameraPseudo:
         # code to execute if webcam is connecected and
         # publishing images. Not the case yet
         if USE_WEBCAM:
-            self.input_stream = cv2.VideoCapture(0)
+            self.input_stream = RemoteWebcamReader()
             if not self.input_stream.isOpened():
                 raise Exception('Camera stream did not open\n')
 
@@ -65,11 +137,10 @@ class CameraPseudo:
         """check if input message is same as value in SPECIFIC_VALUE index"""
         result = True if msg.data == self.labels[SPECIFIC_VALUE] else False
         print "msg.data", msg.data
-        print "self.labels[SPECIFIC_VALUE="+str(SPECIFIC_VALUE)+"]", self.labels[SPECIFIC_VALUE]
+        print "self.labels[SPECIFIC_VALUE=" + str(SPECIFIC_VALUE) + "]", self.labels[SPECIFIC_VALUE]
 
         # publish result
         self.publisher_specific_check.publish(result)
-
 
     def publish_data(self, verbose=0):
         """set rate for publishing data and what to publish """
