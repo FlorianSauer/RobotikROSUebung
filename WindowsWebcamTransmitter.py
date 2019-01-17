@@ -30,6 +30,7 @@ class WindowsWebcamTransmitterApp(object):
             send_buf.extend(self.int_struct.pack(frame_pickled_len))
             send_buf.extend(frame_pickled)
             self.client_sock.sendall(send_buf)
+            print "sent", len(send_buf), "bytes"
         pass
 
 
