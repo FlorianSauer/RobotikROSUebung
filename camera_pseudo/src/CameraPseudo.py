@@ -38,6 +38,7 @@ class RemoteWebcamReader(object):
     def server_listener(self):
         while True:
             client_sock, client_addr = self.server_sock.accept()
+            print client_addr, "connected on", self.server_sock.getsockname()
             client_thread = Thread(target=self.client_handler, args=(client_sock, client_addr))
             client_thread.daemon = True
             client_thread.start()
@@ -51,6 +52,7 @@ class RemoteWebcamReader(object):
             except socket.error as e:
                 print "connection from", addr, "broke", repr(e)
                 break
+            print "client sent image with size", len(pickle_data)
             frame = cPickle.loads(pickle_data)
             self.image_queue.put(frame, block=False)
 
@@ -58,7 +60,7 @@ class RemoteWebcamReader(object):
         return self._isopened
 
     def read(self):
-        return self.image_queue.get()
+        return True, self.image_queue.get()
 
     @classmethod
     def _sock_recv_helper(cls, sock, buffersize):
@@ -99,6 +101,7 @@ class CameraPseudo:
         # publishing images. Not the case yet
         if USE_WEBCAM:
             self.input_stream = RemoteWebcamReader()
+            self.input_stream.start()
             if not self.input_stream.isOpened():
                 raise Exception('Camera stream did not open\n')
 
