@@ -73,7 +73,7 @@ if __name__ == "__main__":
 
     try:
         # register node
-        rospy.init_node('prediction', anonymous=False)
+        rospy.init_node('sound', anonymous=False)
 
         app = RosSoundApp()
         app.run()
