@@ -2,6 +2,7 @@
 import os
 import traceback
 
+import cv2
 import keras
 import numpy
 import rospy
@@ -15,7 +16,8 @@ from typing import TypeVar, Type, Generic, Any
 from wrapt import synchronized
 
 from Libs.PythonLibs.Callback import Callback
-from SoundPlayer import SoundPlayer
+
+# from SoundPlayer import SoundPlayer
 
 T = TypeVar('T', Message, Message)
 PUBLISH_RATE = 3  # hz
@@ -90,6 +92,8 @@ class PredictionCISubscriber(CompressedImageSubscriber):
 
         # Todo: hotencoded -> real class number
 
+        print "Predicted", prediction
+
         if self.prediction_callback.callable(prediction):
             self.prediction_callback.call(prediction)
         else:
@@ -107,6 +111,8 @@ class PredictionCISubscriber(CompressedImageSubscriber):
         # type: (CvBridge, CompressedImage) -> numpy.array
         """adjust the image message to necessary format for prediction"""
         a = bridge.compressed_imgmsg_to_cv2(message)
+        # print a.shape
+        a = cv2.resize(a, (28, 28))
         a = a.reshape(28, 28, 1)
         a = a.astype('float32')
         a /= 255.
@@ -119,22 +125,20 @@ class RosPredictionApp(object):
 
     def __init__(self):
         print "__init__", self.__class__.__name__
-        self.sound_player = SoundPlayer(self.resource_path)
+        # self.sound_player = SoundPlayer(self.resource_path)
         # declare+register prediction result topic
         self.prediction_publisher = rospy.Publisher('/camera/input/specific/number',
                                                     Int32,
                                                     queue_size=1)  # publish given data as 32bit integer to topic
         # -> wrap .publish() in Callback
-        self.prediction_publish_callback = Callback(lambda i: self.sound_player.playSound(i), single=True)
+        # self.prediction_publish_callback = Callback(lambda i: self.sound_player.playSound(i), single=True)
+        self.prediction_publish_callback = Callback(lambda i: self.prediction_publisher.publish(i), single=True)
 
         # -> pass Callback to self.subscriber
         # register subscriber @roscore node with given topic
-        self.subscriber = PredictionCISubscriber('/camera/output/specific/compressed_img_msgs',
+        self.subscriber = PredictionCISubscriber('/camera/output/webcam/compressed_img_msgs',
                                                  self.loadMakeModel(self.modelpath),
                                                  self.prediction_publish_callback)
-
-        self.checkSubscriber = MessagePrinterSubscriber('/camera/output/specific/check', Bool)
-
         pass
 
     def run(self):
