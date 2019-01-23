@@ -53,7 +53,7 @@ class RemoteWebcamReader(object):
                 print "connection from", addr, "broke", repr(e)
                 break
             print "client sent image with size", len(pickle_data)
-            frame = cPickle.loads(pickle_data)
+            frame = cPickle.loads(pickle_data)  # type:
             self.image_queue.put(frame, block=False)
 
     def isOpened(self):
@@ -116,11 +116,11 @@ class CameraPseudo:
                                                         Bool,
                                                         queue_size=1)
 
-        # subscriber specific: receive prediction made by Prediction node as an integer. Send this
-        # to callback (camera_specific_callback) to evaluate the correctness of the prediction made
-        rospy.Subscriber('/camera/input/specific/number',
-                         Int32,
-                         self.camera_specific_callback)
+        # # subscriber specific: receive prediction made by Prediction node as an integer. Send this
+        # # to callback (camera_specific_callback) to evaluate the correctness of the prediction made
+        # rospy.Subscriber('/camera/input/specific/number',
+        #                  Int32,
+        #                  self.camera_specific_callback)
 
         # publisher random: not relevant for our solution
         self.publisher_random_comprs = rospy.Publisher("/camera/output/random/compressed_img_msgs",
@@ -150,14 +150,7 @@ class CameraPseudo:
         rate = rospy.Rate(PUBLISH_RATE)
 
         while not rospy.is_shutdown():
-            self.publish_specific(verbose)
-            self.publish_random(verbose)
-
-            # Note:
-            # reactivate for webcam image. Pay attention to required subscriber buffer size.
-            # See README.md for further information
-            if USE_WEBCAM:
-                self.publish_webcam(verbose)
+            self.publish_webcam(verbose)
 
             rate.sleep()
 
