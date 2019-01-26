@@ -127,16 +127,21 @@ class RosPredictionApp(object):
         print "__init__", self.__class__.__name__
         # self.sound_player = SoundPlayer(self.resource_path)
         # declare+register prediction result topic
-        self.prediction_publisher = rospy.Publisher('/camera/input/specific/number',
+        self.prediction_publisher = rospy.Publisher('/number',
                                                     Int32,
                                                     queue_size=1)  # publish given data as 32bit integer to topic
         # -> wrap .publish() in Callback
         # self.prediction_publish_callback = Callback(lambda i: self.sound_player.playSound(i), single=True)
-        self.prediction_publish_callback = Callback(lambda i: self.prediction_publisher.publish(i), single=True)
+
+        def publish(i):
+            print "publish", i
+            self.prediction_publisher.publish(i)
+
+        self.prediction_publish_callback = Callback(lambda i: publish(i), single=True)
 
         # -> pass Callback to self.subscriber
         # register subscriber @roscore node with given topic
-        self.subscriber = PredictionCISubscriber('/camera/output/webcam/compressed_img_msgs',
+        self.subscriber = PredictionCISubscriber('/image',
                                                  self.loadMakeModel(self.modelpath),
                                                  self.prediction_publish_callback)
         pass

@@ -3,11 +3,12 @@ import os
 import traceback
 
 import rospy
+import rosgraph
 from genpy import Message
 from std_msgs.msg import Int32, Bool
 from typing import TypeVar, Type, Generic
 
-from SoundPlayer import SoundPlayer
+# from SoundPlayer import SoundPlayer
 
 T = TypeVar('T', Message, Message)
 PUBLISH_RATE = 3  # hz
@@ -43,11 +44,12 @@ class SoundPlayerSubscriber(RosSubscriber):
 
     def __init__(self, topic, soundpath):
         super(SoundPlayerSubscriber, self).__init__(topic, Int32)
-        self.soundplayer = SoundPlayer(soundpath)
+        # self.soundplayer = SoundPlayer(soundpath)
 
     def handle(self, message):
         # type: (Int32) -> None
-        self.soundplayer.playSound(message.data)
+        print "play", message.data
+        # self.soundplayer.playSound(message.data)
 
 
 class RosSoundApp(object):
@@ -55,7 +57,7 @@ class RosSoundApp(object):
 
     def __init__(self):
         print "__init__", self.__class__.__name__
-        self.subscriber = SoundPlayerSubscriber('/camera/input/specific/number', self.resource_path)
+        self.subscriber = SoundPlayerSubscriber('number', self.resource_path)
 
         pass
 
@@ -65,6 +67,7 @@ class RosSoundApp(object):
 
         while not rospy.is_shutdown():
             rate.sleep()
+            print "Master online:", rosgraph.is_master_online()
         pass
 
 
