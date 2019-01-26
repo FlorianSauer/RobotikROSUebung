@@ -1,7 +1,6 @@
  cmake_minimum_required(VERSION 2.8.3)
 project(sound)
 
-find_package(OpenCV 3.2 REQUIRED)
 
 ## Find catkin macros and libraries
 find_package(catkin REQUIRED COMPONENTS rospy roscpp sensor_msgs)
