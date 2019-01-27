@@ -8,7 +8,7 @@ from genpy import Message
 from std_msgs.msg import Int32, Bool
 from typing import TypeVar, Type, Generic
 
-# from SoundPlayer import SoundPlayer
+from SoundPlayer import SoundPlayer
 
 T = TypeVar('T', Message, Message)
 PUBLISH_RATE = 3  # hz
@@ -44,12 +44,12 @@ class SoundPlayerSubscriber(RosSubscriber):
 
     def __init__(self, topic, soundpath):
         super(SoundPlayerSubscriber, self).__init__(topic, Int32)
-        # self.soundplayer = SoundPlayer(soundpath)
+        self.soundplayer = SoundPlayer(soundpath)
 
     def handle(self, message):
         # type: (Int32) -> None
         print "play", message.data
-        # self.soundplayer.playSound(message.data)
+        self.soundplayer.playSound(message.data)
 
 
 class RosSoundApp(object):
