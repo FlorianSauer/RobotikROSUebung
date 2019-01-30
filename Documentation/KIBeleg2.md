@@ -28,14 +28,31 @@ Lediglich haben wir den Sound Node eingefügt als alternative  ausgabe möglichk
 
 <h2> Beschreibung verwendeter Konzepte und Architekturen (Theorie)</h2>
 
+- autonomes p2p system (lookup diplomarbeit)
+- VM mit NAT oder Bridge network
+- NAT und warum wir p2p brauchen + rtunnel
+- bridge??!?!?!!!!ausrufezeichen
+- Publisher Subscriber (copy paste)
+- Callbacks
+
 <h2> Beschreibung der Implementierung </h2>
 
-#Project extensions
-	# Callback module
-	# removed publisher subscriber nodes
-	# camera class
-	# removed cv bridge dependency
+- vm p2p node macht connection zu public p2p node, asks for routing
+- public node creates connection to host p2p node, notifies vm p2p node about success. From now on the Public p2p node routes all traffic between host and vm p2p node.
+- vm p2p node informs host p2p node to create a RTunnel.
+- WebcamTransmitter connects on host system to tunnelentry on host p2p node
+- host p2p node forwards tunnel data to the recipient (vm p2p node)
+- vm p2p node forwards tunnled data to the destination (ros-node camera_pseudo)
+- ros does ros things
 
+
+#Project extensions
+    # camera_pseudo accepts image data via TCP sockets (socket server)
+    # 
+	# removed not needed publisher subscriber topics in camera_pseudo and prediction nodes
+	# camera Program to read images from webcam and send via TCP socket to the camera_pseudo-TCP-server
+    # added sound node for sound output
+ 
 
 <h2> Graphische Darstellungen </h2>
 
