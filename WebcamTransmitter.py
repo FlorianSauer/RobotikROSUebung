@@ -6,7 +6,7 @@ import time
 import cv2
 
 
-class WindowsWebcamTransmitterApp(object):
+class WebcamTransmitterApp(object):
     def __init__(self):
         self.input_stream = cv2.VideoCapture(0)
         if not self.input_stream.isOpened():
@@ -41,5 +41,5 @@ class WindowsWebcamTransmitterApp(object):
 
 
 if __name__ == "__main__":
-    app = WindowsWebcamTransmitterApp()
+    app = WebcamTransmitterApp()
     app.run()
