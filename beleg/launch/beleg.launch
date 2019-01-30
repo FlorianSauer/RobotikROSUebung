@@ -1,0 +1,10 @@
+<launch>
+    <!-- cameras -->
+    <node name="camera_pseudo" pkg="camera_pseudo" type="CameraPseudo.py" output="screen"/>
+
+    <!-- prediction -->
+    <node name="prediction" pkg="prediction" type="Prediction.py" output="screen"/>
+
+    <!-- sound -->
+    <node name="sound" pkg="sound" type="Sound.py" output="screen"/>
+</launch>
