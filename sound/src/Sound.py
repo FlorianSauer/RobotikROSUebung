@@ -3,7 +3,7 @@ import os
 import traceback
 
 import rospy
-import rosgraph
+# import rosgraph
 from genpy import Message
 from std_msgs.msg import Int32, Bool
 from typing import TypeVar, Type, Generic
@@ -67,7 +67,7 @@ class RosSoundApp(object):
 
         while not rospy.is_shutdown():
             rate.sleep()
-            print "Master online:", rosgraph.is_master_online()
+            # print "Master online:", rosgraph.is_master_online()
         pass
 
 
