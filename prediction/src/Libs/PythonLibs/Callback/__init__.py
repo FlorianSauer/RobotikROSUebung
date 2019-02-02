@@ -4,6 +4,8 @@ Module for better handling Callbacks with arguments.
 created by sauer
 """
 
+__author__ = "Florian Sauer"
+
 import inspect
 from threading import Lock
 
