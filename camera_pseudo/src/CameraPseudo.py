@@ -7,16 +7,20 @@ from threading import Thread
 
 import rospy
 from cv_bridge import CvBridge
-from keras.datasets import mnist
 from sensor_msgs.msg import CompressedImage
 from typing import Tuple
 
-SPECIFIC_VALUE = 6  # value can be changed for different test-cases. This is not the labeled value but an index
 PUBLISH_RATE = 3  # hz
 USE_WEBCAM = True
 
 
 class RemoteWebcamReader(object):
+    """
+    Object to replace/mimic the cv2 VideoCapture object.
+
+    Opens a tcp server on port 42069. A corresponding WebcamTransmitter can connect to the server and transmit image
+    data (data is packed with Pickle)
+    """
     def __init__(self):
         self.server_sock = socket.socket()
         self.server_sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
@@ -95,22 +99,11 @@ class CameraPseudo:
         self.publisher_webcam_comprs = rospy.Publisher("/image",
                                                        CompressedImage,
                                                        queue_size=1)
-        # code to execute if webcam is connecected and
-        # publishing images. Not the case yet
-        if USE_WEBCAM:
-            self.input_stream = RemoteWebcamReader()
-            self.input_stream.start()
-            if not self.input_stream.isOpened():
-                raise Exception('Camera stream did not open\n')
 
-        # # subscriber specific: receive prediction made by Prediction node as an integer. Send this
-        # # to callback (camera_specific_callback) to evaluate the correctness of the prediction made
-        # rospy.Subscriber('/camera/input/specific/number',
-        #                  Int32,
-        #                  self.camera_specific_callback)
-
-        # use mnist data as pseudo webcam images
-        (_, _), (self.images, self.labels) = mnist.load_data()
+        self.input_stream = RemoteWebcamReader()
+        self.input_stream.start()
+        if not self.input_stream.isOpened():
+            raise Exception('Camera stream did not open\n')
 
         rospy.loginfo("Publishing data...")
 
