@@ -5,6 +5,8 @@
 	<description>Pseudo Camera Publisher</description>
 
 	<maintainer email="baumannpa@gmail.com">Patrick Baumann</maintainer>
+	<maintainer email="s0552569@htw-berlin.de">Florian Sauer</maintainer>
+	<maintainer email="s0546867@htw-berlin.de">Camilo Ocampo</maintainer>
 	<license>MIT</license>
 
 	<buildtool_depend>catkin</buildtool_depend>
