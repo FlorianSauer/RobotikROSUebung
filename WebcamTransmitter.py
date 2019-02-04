@@ -9,7 +9,7 @@ import cv2
 
 
 class WebcamTransmitterApp(object):
-    argparser = argparse.ArgumentParser()
+    argparser = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter)
     argparser.add_argument('--ip', help="The ip of the ROS-Core", type=str, default='127.0.0.1',
                            dest='ip')  # Todo: better naming
     argparser.add_argument('--port', help="The port", default=42069, type=int, dest='port')
