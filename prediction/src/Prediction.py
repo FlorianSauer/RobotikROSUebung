@@ -119,6 +119,45 @@ class PredictionCISubscriber(CompressedImageSubscriber):
         return a
 
 
+class PredictionCITestSubscriber(PredictionCISubscriber):
+
+    def __init__(self, topic, model, prediction_callback):
+        # type: (str, Model, Callback[int, Any]) -> None
+        """
+        :param topic:
+        :param model: should be already trained model
+        :param prediction_callback:
+        """
+        super(PredictionCISubscriber, self).__init__(topic)
+
+        self.model = model
+        self.prediction_callback = prediction_callback
+        self.cv_bridge = CvBridge()
+
+    # overwrite handle function from superclass
+    @synchronized
+    def handle(self, message):
+        # type: (CompressedImage) -> None
+        """make prediction based on received image message"""
+
+        print "your function is already being called!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"
+
+        input_data = numpy.expand_dims(self.unpackMessage(message), axis=0)  # tensorflow
+        prediction = self.model.predict(input_data)
+        # noinspection PyUnresolvedReferences
+        prediction = numpy.argmax(prediction, axis=None, out=None)
+
+        # Todo: hotencoded -> real class number
+
+        print "Predictionssssss", prediction
+
+        if self.prediction_callback.callable(prediction):
+            self.prediction_callback.call(prediction)
+        else:
+            print "YOUR CALLBACK FAILED, maybe you should rework this ;)"
+
+
+#
 class RosPredictionApp(object):
     resource_path = os.path.abspath(os.path.join(os.path.dirname(__file__), 'Resources'))
     modelpath = os.path.join(resource_path, 'weights-best.hdf5')
@@ -130,6 +169,7 @@ class RosPredictionApp(object):
         self.prediction_publisher = rospy.Publisher('/number',
                                                     Int32,
                                                     queue_size=1)  # publish given data as 32bit integer to topic
+
         # -> wrap .publish() in Callback
         # self.prediction_publish_callback = Callback(lambda i: self.sound_player.playSound(i), single=True)
 
