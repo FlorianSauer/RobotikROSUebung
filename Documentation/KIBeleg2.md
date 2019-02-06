@@ -6,7 +6,7 @@ Unser Programm ist eine Erweiterung von Exercise 1, dessen Dokumentation man hie
 
 Es ist in 3 Hinsichten erweitert: </br> 
 1. Bilddaten werden von einer Camera gelesen </br> 
-2. Eingelesene Daten werden über ein Peer to peer Netzwerk an ROS geschickt  </br> 
+2. Eingelesene Daten werden per TCP-Socket an ROS geschickt  </br> 
 3. Vorhersagen werden jetzt per text to speech ausgegeben </br> 
 </br>
 
