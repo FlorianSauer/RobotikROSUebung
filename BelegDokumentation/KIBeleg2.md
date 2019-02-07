@@ -10,7 +10,7 @@ Es ist in 3 Hinsichten erweitert: </br>
 3. Vorhersagen werden jetzt per text to speech ausgegeben </br> 
 </br>
 
-<mark> Bevor man loslegt sollte man sicherstellen dass man sich auf dem Sound Branch befindet </mark>
+<mark> Bevor man loslegt sollte man sicherstellen dass man sich auf dem Beleg Branch befindet </mark>
 <h3>Wie startet man das Program? </h3>
 
 1. catkin_make aufrufen
