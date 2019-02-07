@@ -18,7 +18,10 @@ Es ist in 3 Hinsichten erweitert: </br>
 3. Vorhersagen werden jetzt per Text to Speech ausgegeben </br> 
 </br>
 
-Der neue Repo findet man hier:
+Der neue Repo findet man ebenso hier: </br></br>
+
+https://github.com/FlorianSauer/RobotikROSUebung
+</br></br>
 
 <mark> Bevor man loslegt sollte man sicherstellen dass man sich auf dem Beleg Branch befindet </mark>
 <h3>Wie startet man das Program? </h3>
